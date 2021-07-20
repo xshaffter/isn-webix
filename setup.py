@@ -16,7 +16,7 @@ setup(
     license='MIT',
     install_requires=[
         'Django>=1.11.29',
-        'djangorestframework>=3.9.4'
+        'djangorestframework>=3.9.4',
         'api-auto-doc>=0.1.0'
     ]
 )
