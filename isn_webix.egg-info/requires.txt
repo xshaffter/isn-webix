@@ -1,2 +1,0 @@
-Django>=1.11.29
-djangorestframework>=3.9.4api-auto-doc>=0.1.0
