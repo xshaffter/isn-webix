@@ -3,10 +3,17 @@ import re
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
-from post_office.mail import send as send_mail
+
+# noinspection PyBroadException
+try:
+    # noinspection PyUnresolvedReferences
+    from post_office.mail import send as send_mail
+except Exception:
+    from django.core.mail import send_mail
+
 from django.db import models, transaction
 
-from cat.models import CommonModel
+from isn_webix.models import CommonModel
 
 
 class FlowModel(CommonModel):
@@ -31,7 +38,8 @@ class FlowModel(CommonModel):
     def __init__(self, *args, **kwargs):
         super(FlowModel, self).__init__(*args, **kwargs)
         if self.pk and self.attendant:
-            self.APPROVED_MESSAGE = 'hi, {}. \nThe approval for {} has been accepted.'.format(self.attendant.get_full_name(), self.__unicode__())
+            self.APPROVED_MESSAGE = 'hi, {}. \nThe approval for {} has been accepted.'.format(
+                self.attendant.get_full_name(), self.__unicode__())
 
     def send_approval_message(self):
 
@@ -43,7 +51,8 @@ class FlowModel(CommonModel):
 
         send_mail(
             subject='Approval request for {}'.format(self.__unicode__().lower()),
-            message='Hi, {}.\nYour approval for {} has been requested.'.format(self.attendant.get_full_name(), self.__unicode__()),
+            message='Hi, {}.\nYour approval for {} has been requested.'.format(self.attendant.get_full_name(),
+                                                                               self.__unicode__()),
             sender=DEFAULT_FROM_EMAIL,
             recipients=[self.attendant.email]
         )
@@ -75,7 +84,9 @@ class FlowModel(CommonModel):
         )
 
     def send_rejected_message(self):
-        message = 'hi, {}. \nThe approval for {} has been rejected due to:\n{}'.format(self.attendant.get_full_name(), self.__unicode__(), self.rejection_comment)
+        message = 'hi, {}. \nThe approval for {} has been rejected due to:\n{}'.format(self.attendant.get_full_name(),
+                                                                                       self.__unicode__(),
+                                                                                       self.rejection_comment)
         approval_permissions = getattr(self, 'APPROVAL_PERMISSIONS', False)
         if not message:
             raise ValueError('A message is required to send a mail.')
