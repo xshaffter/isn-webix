@@ -18,4 +18,4 @@ tqdm==4.61.2
 twine==1.15.0
 urllib3==1.26.6
 webencodings==0.5.1
-api-auto-doc==0.1.0
+api-auto-doc==0.1.3

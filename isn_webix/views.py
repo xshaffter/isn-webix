@@ -1,18 +1,18 @@
 import sys
 
 from api_auto_doc.utils import ReadOnly
-from api_auto_doc.views import BaseModelViewSet
+from api_auto_doc.views import BaseViewSet, LIST_SERIALIZER
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from isn_webix.utils import WebixPagination
 from isn_webix.serializers import SelectListSerializer, RejectionSerializer
+from isn_webix.utils import WebixPagination
 
 
 # noinspection PyProtectedMember,PyBroadException,PyAttributeOutsideInit,PyUnresolvedReferences
-class WebixBaseModelViewSet(BaseModelViewSet):
+class WebixBaseModelViewSet(BaseViewSet):
     list_serializer_class = None
     choice_fields = list()
 
@@ -26,6 +26,7 @@ class WebixBaseModelViewSet(BaseModelViewSet):
     def get_choice(self, choices=tuple()):
         data = [dict(id=identifier, value=value) for identifier, value in choices]
         return Response(data)
+
 
     def get_serializer_class(self):
         try:
@@ -70,6 +71,7 @@ class WebixBaseModelViewSet(BaseModelViewSet):
 
     # noinspection PyProtectedMember
     def __init__(self, *args, **kwargs):
+        super(BaseModelViewSet, self).__init__(*args, **kwargs)
         self.model = self.queryset.model
         fields = self.model._meta.fields
         choice_fields = list()
@@ -86,7 +88,6 @@ class WebixBaseModelViewSet(BaseModelViewSet):
 
         self.choice_fields = choice_fields
         self.extra_urls = choice_urls
-        super(BaseModelViewSet, self).__init__(*args, **kwargs)
 
 
 class WebixReadOnlyModelViewSet(mixins.RetrieveModelMixin,
@@ -123,6 +124,7 @@ class WebixRUDModelViewSet(mixins.RetrieveModelMixin,
     pass
 
 
+# noinspection PyUnresolvedReferences
 class FlowModelViewSet(object):
 
     @action(detail=False, methods=['get'], serializer_class=LIST_SERIALIZER)
@@ -142,10 +144,6 @@ class FlowModelViewSet(object):
         return self.list_serializer_class or self.serializer_class
 
     def get_list_serializer(self, *args, **kwargs):
-        """
-        Return the serializer instance that should be used for validating and
-        deserializing input, and for serializing output.
-        """
         serializer_class = self.get_list_serializer_class()
         kwargs['context'] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
