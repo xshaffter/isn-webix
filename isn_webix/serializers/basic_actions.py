@@ -7,8 +7,7 @@ class RejectionSerializer(serializers.Serializer):
     comment = serializers.CharField(required=True, allow_blank=False)
 
     def validate(self, attrs):
-        status = attrs.get('status')
-        if status != FlowModel.APPROVAL_REQUESTED:
+        if self.instance.status != FlowModel.APPROVAL_REQUESTED:
             raise serializers.ValidationError("Only drafts that requested for approval can be rejected.")
         return attrs
 
@@ -18,11 +17,9 @@ class RejectionSerializer(serializers.Serializer):
 
 # noinspection PyAbstractClass
 class ApproveSerializer(serializers.Serializer):
-    comment = serializers.CharField(required=True, allow_blank=False)
 
     def validate(self, attrs):
-        status = attrs.get('status')
-        if status != FlowModel.APPROVAL_REQUESTED:
+        if self.instance.status != FlowModel.APPROVAL_REQUESTED:
             raise serializers.ValidationError("Only drafts that requested for approval can be approved.")
         return attrs
 
@@ -32,14 +29,11 @@ class ApproveSerializer(serializers.Serializer):
 
 # noinspection PyAbstractClass
 class RequestApprovalSerializer(serializers.Serializer):
-    comment = serializers.CharField(required=True, allow_blank=False)
 
     def validate(self, attrs):
-        status = attrs.get('status')
-        if status != FlowModel.CREATED:
+        if self.instance.status != FlowModel.CREATED:
             raise serializers.ValidationError("Only drafts can request for approval.")
         return attrs
 
     def __init__(self, *args, **kwargs):
         super(RequestApprovalSerializer, self).__init__(*args, **kwargs)
-

@@ -70,7 +70,7 @@ class WebixBaseModelViewSet(BaseViewSet):
 
     # noinspection PyProtectedMember
     def __init__(self, *args, **kwargs):
-        super(BaseModelViewSet, self).__init__(*args, **kwargs)
+        super(WebixBaseModelViewSet, self).__init__(*args, **kwargs)
         self.model = self.queryset.model
         fields = self.model._meta.fields
         choice_fields = list()
@@ -125,16 +125,22 @@ class WebixRUDModelViewSet(mixins.RetrieveModelMixin,
 
 # noinspection PyUnresolvedReferences
 class FlowModelViewSet(object):
+    
+    def __init__(self, *args, **kwargs):
+        super(FlowModelViewSet, self).__init__(*args, **kwargs)
+        assert(issubclass(self.queryset.model, FlowModel), 'Only FlowModel classes can use this ViewSet type')
+
+        
 
     @action(detail=True, methods=['put'], serializer_class=RejectionSerializer)
     def reject(self, request, pk=None):
         model = self.queryset.model
         instance = get_object_or_404(model, pk=pk)
         serializer = self.get_serializer(instance=instance, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            comment = request.data.get('comment')
-            message = instance.reject(comment)
-            return Response(status=status.HTTP_200_OK, data={'message': message})
+        serializer.is_valid(raise_exception=True)
+        comment = request.data.get('comment')
+        message = instance.reject(comment)
+        return Response(status=status.HTTP_200_OK, data={'message': message})
 
     @action(detail=True, methods=['put'], serializer_class=ApproveSerializer)
     def approve(self, request, pk=None):
@@ -154,8 +160,9 @@ class FlowModelViewSet(object):
         message = instance.request_approval()
         return Response(status=status.HTTP_200_OK, data={'message': message})
 
-    def get_queryset(self, user=None):
+    def get_queryset(self):
         queryset = self.queryset.all()
+        user = self.request.user
         if user and not user.has_perm(self.model().VIEW_ALL_PERMISSION):
             queryset = queryset.filter(attendant=user)
         return queryset

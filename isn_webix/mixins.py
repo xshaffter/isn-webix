@@ -18,7 +18,7 @@ class WebixListModelMixin(object):
 
     @action(detail=False, methods=['get'], serializer_class=LIST_SERIALIZER)
     def wlist(self, request):
-        queryset = self.filter_queryset(self.get_queryset(request.user).order_by('-pk'))
+        queryset = self.filter_queryset(self.get_queryset()).order_by('-pk')
         paginator = WebixPagination()
         paginated = paginator.paginate_queryset(queryset, request, self)
         origin_field = None
