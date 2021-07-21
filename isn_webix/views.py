@@ -127,10 +127,8 @@ class WebixRUDModelViewSet(mixins.RetrieveModelMixin,
 class FlowModelViewSet(object):
     
     def __init__(self, *args, **kwargs):
+        assert(issubclass(self.queryset.model, FlowModel)), 'Only FlowModel classes can use this ViewSet type'
         super(FlowModelViewSet, self).__init__(*args, **kwargs)
-        assert(issubclass(self.queryset.model, FlowModel), 'Only FlowModel classes can use this ViewSet type')
-
-        
 
     @action(detail=True, methods=['put'], serializer_class=RejectionSerializer)
     def reject(self, request, pk=None):
@@ -168,9 +166,9 @@ class FlowModelViewSet(object):
         return queryset
 
 
-class FlowCRUDModelViewSet(WebixCRUDModelViewSet, FlowModelViewSet):
+class FlowCRUDModelViewSet(FlowModelViewSet, WebixCRUDModelViewSet):
     pass
 
 
-class FlowRUDModelViewSet(WebixRUDModelViewSet, FlowModelViewSet):
+class FlowRUDModelViewSet(FlowModelViewSet, WebixRUDModelViewSet):
     pass
