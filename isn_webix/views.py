@@ -7,11 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from isn_webix import WebixPagination
+from isn_webix.utils import WebixPagination
 from isn_webix.serializers import SelectListSerializer, RejectionSerializer
-
-DEFAULT_SERIALIZER = -1
-LIST_SERIALIZER = -2
 
 
 # noinspection PyProtectedMember,PyBroadException,PyAttributeOutsideInit,PyUnresolvedReferences

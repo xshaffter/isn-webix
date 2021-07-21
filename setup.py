@@ -6,7 +6,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 
 setup(
     name='isn-webix',
-    version='0.1.0',
+    version='0.1.3',
     packages=['isn_webix'],
     description='Work with prepared Webix-django classes',
     long_description=README,
@@ -17,6 +17,6 @@ setup(
     install_requires=[
         'Django>=1.11.29',
         'djangorestframework>=3.9.4',
-        'api-auto-doc>=0.1.0'
+        'api-auto-doc>=0.1.1'
     ]
 )
