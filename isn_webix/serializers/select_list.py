@@ -8,8 +8,3 @@ class SelectListSerializer(serializers.Serializer):
 
     def get_value(self, instance):
         return instance.__unicode__()
-
-
-# noinspection PyAbstractClass
-class RejectionSerializer(serializers.Serializer):
-    comment = serializers.CharField(required=True, allow_blank=False)

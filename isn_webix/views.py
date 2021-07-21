@@ -1,19 +1,18 @@
 import sys
 
 from api_auto_doc.utils import ReadOnly
-from api_auto_doc.views import BaseViewSet, LIST_SERIALIZER
+from api_auto_doc.views import BaseViewSet
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from isn_webix.serializers import SelectListSerializer, RejectionSerializer
-from isn_webix.utils import WebixPagination
+from isn_webix.mixins import WebixListModelMixin
+from isn_webix.serializers import SelectListSerializer, RejectionSerializer, ApproveSerializer, RequestApprovalSerializer
 
 
 # noinspection PyProtectedMember,PyBroadException,PyAttributeOutsideInit,PyUnresolvedReferences
 class WebixBaseModelViewSet(BaseViewSet):
-    list_serializer_class = None
     choice_fields = list()
 
     @action(detail=False, methods=['get'], serializer_class=SelectListSerializer)
@@ -91,7 +90,7 @@ class WebixBaseModelViewSet(BaseViewSet):
 
 
 class WebixReadOnlyModelViewSet(mixins.RetrieveModelMixin,
-                                mixins.ListModelMixin,
+                                WebixListModelMixin,
                                 WebixBaseModelViewSet):
     permission_classes = [ReadOnly]
 
@@ -112,41 +111,20 @@ class WebixCRUDModelViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
                             mixins.UpdateModelMixin,
                             mixins.DestroyModelMixin,
-                            mixins.ListModelMixin,
+                            WebixListModelMixin,
                             WebixBaseModelViewSet):
     pass
 
 
 class WebixRUDModelViewSet(mixins.RetrieveModelMixin,
                            mixins.UpdateModelMixin,
-                           mixins.ListModelMixin,
+                           WebixListModelMixin,
                            WebixBaseModelViewSet):
     pass
 
 
 # noinspection PyUnresolvedReferences
 class FlowModelViewSet(object):
-
-    @action(detail=False, methods=['get'], serializer_class=LIST_SERIALIZER)
-    def wlist(self, request):
-        queryset = self.filter_queryset(self.get_queryset(request.user).order_by('-pk'))
-        paginator = WebixPagination()
-        paginated = paginator.paginate_queryset(queryset, request, self)
-        origin_field = None
-        if queryset.model != self.get_list_serializer_class().Meta.model:
-            paginated = [item.lead for item in paginated if item.lead]
-            if paginated:
-                origin_field = self.queryset.first().field_name()
-        data = self.get_list_serializer(origin_field=origin_field, instance=paginated, many=True).data
-        return paginator.get_paginated_response(data)
-
-    def get_list_serializer_class(self):
-        return self.list_serializer_class or self.serializer_class
-
-    def get_list_serializer(self, *args, **kwargs):
-        serializer_class = self.get_list_serializer_class()
-        kwargs['context'] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
 
     @action(detail=True, methods=['put'], serializer_class=RejectionSerializer)
     def reject(self, request, pk=None):
@@ -158,17 +136,21 @@ class FlowModelViewSet(object):
             message = instance.reject(comment)
             return Response(status=status.HTTP_200_OK, data={'message': message})
 
-    @action(detail=True, methods=['put'])
+    @action(detail=True, methods=['put'], serializer_class=ApproveSerializer)
     def approve(self, request, pk=None):
         model = self.queryset.model
         instance = get_object_or_404(model, pk=pk)
+        serializer = self.get_serializer(instance=instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
         message = instance.approve()
         return Response(status=status.HTTP_200_OK, data={'message': message})
 
-    @action(detail=True, methods=['put'])
+    @action(detail=True, methods=['put'], serializer_class=RequestApprovalSerializer)
     def request_approval(self, request, pk=None):
         model = self.queryset.model
         instance = get_object_or_404(model, pk=pk)
+        serializer = self.get_serializer(instance=instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
         message = instance.request_approval()
         return Response(status=status.HTTP_200_OK, data={'message': message})
 

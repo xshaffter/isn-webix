@@ -6,7 +6,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 
 setup(
     name='isn-webix',
-    version='0.1.4',
+    version='0.2.0',
     packages=['isn_webix'],
     description='Work with prepared Webix-django classes',
     long_description=README,
