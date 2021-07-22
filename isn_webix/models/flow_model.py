@@ -1,19 +1,10 @@
-import re
-
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.models import User
-
-# noinspection PyBroadException
-try:
-    # noinspection PyUnresolvedReferences
-    from post_office.mail import send as send_mail
-except Exception:
-    from django.core.mail import send_mail
-
 from django.db import models, transaction
 
 from isn_webix.models import CommonModel
+
+send_mail = __import__(getattr(settings, 'SEND_MAIL_APPLICATION', 'django.core.mail.send_mail'))
 
 
 class FlowModel(CommonModel):
@@ -42,7 +33,7 @@ class FlowModel(CommonModel):
                 self.attendant.get_full_name(), self.__unicode__())
 
     def send_approval_message(self):
-
+        User = apps.get_model('auth', 'User')
         approval_permissions = getattr(self, 'APPROVAL_PERMISSIONS', False)
         if not approval_permissions:
             raise ValueError('APPROVAL_PERMISSIONS required to be filled in this model')

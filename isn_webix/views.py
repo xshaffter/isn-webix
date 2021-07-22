@@ -26,21 +26,12 @@ class WebixBaseModelViewSet(BaseViewSet):
         data = [dict(id=identifier, value=value) for identifier, value in choices]
         return Response(data)
 
-
-    def get_serializer_class(self):
-        try:
-            serializer_class = getattr(self, sys._getframe(2).f_code.co_name).kwargs.get('serializer_class')
-        except:
-            serializer_class = self.serializer_class
-        return serializer_class or self.serializer_class
-
     def dispatch(self, request, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
         request = self.initialize_request(request, *args, **kwargs)
         self.request = request
         self.headers = self.default_response_headers
-        caught_except = False
         exc = None
         response = None
         # noinspection PyBroadException
@@ -54,15 +45,16 @@ class WebixBaseModelViewSet(BaseViewSet):
                 handler = self.http_method_not_allowed
             response = handler(request, *args, **kwargs)
         except Exception as exc:
-            caught_except = True
-        if caught_except:
             if self.action and "_choice_field_" in self.action:
-                # noinspection PyBroadException
-                try:
-                    field_dict = next(item for item in self.choice_fields if item["name"] == self.action)
-                    response = self.get_choice(field_dict['field'].choices)
-                except Exception:
-                    response = self.handle_exception(exc)
+                if request.method.lower() not in self.extra_urls[request.path]['methods']:
+                    response = self.http_method_not_allowed(request, *args, **kwargs)
+                else:
+                    # noinspection PyBroadException
+                    try:
+                        field_dict = self.choice_fields[self.action]
+                        response = self.get_choice(field_dict['field'].choices)
+                    except Exception:
+                        response = self.handle_exception(exc)
             elif exc:
                 response = self.handle_exception(exc)
         self.response = self.finalize_response(request, response, *args, **kwargs)
@@ -73,31 +65,30 @@ class WebixBaseModelViewSet(BaseViewSet):
         super(WebixBaseModelViewSet, self).__init__(*args, **kwargs)
         self.model = self.queryset.model
         fields = self.model._meta.fields
-        choice_fields = list()
+        choice_fields = dict()
         choice_urls = dict()
         for field in fields:
             if len(field.choices) > 0:
                 name = "{}_choice_field_{}".format(self.model._meta.model_name, field.attname)
-                choice_fields.append(dict(name=name, field=field))
+                choice_fields[name] = {
+                    'field': field
+                }
                 choice_urls['/api/{}/choice_field/{}/'.format(self.model._meta.model_name, field.attname)] = {
                     'methods': ['get'],
                     'fields': ['id', 'value']
                 }
                 setattr(self, name, self.get_choice())
 
-        self.choice_fields = choice_fields
-        self.extra_urls = choice_urls
-
 
 class WebixReadOnlyModelViewSet(mixins.RetrieveModelMixin,
                                 WebixListModelMixin,
                                 WebixBaseModelViewSet):
-    permission_classes = [ReadOnly]
+    extra_permission_classes = [ReadOnly]
 
 
 class WebixRetreiveOnlyModelViewSet(mixins.RetrieveModelMixin,
                                     WebixBaseModelViewSet):
-    permission_classes = [ReadOnly]
+    extra_permission_classes = [ReadOnly]
 
 
 class WebixDetailModelViewSet(mixins.RetrieveModelMixin,
