@@ -3,9 +3,15 @@ from django.conf import settings
 from django.db import models, transaction
 
 from isn_webix.models import CommonModel
+SEND_MAIL_APPLICATION = getattr(settings, 'SEND_MAIL_APPLICATION', 'post_office.mail.send').split('.')
 
-send_mail = __import__(getattr(settings, 'SEND_MAIL_APPLICATION', 'django.core.mail.send_mail'))
-
+MAIL_APPLICATION = SEND_MAIL_APPLICATION[0]
+send_func = SEND_MAIL_APPLICATION[-1]
+submodules = SEND_MAIL_APPLICATION[1:-1]
+last_module = __import__(MAIL_APPLICATION)
+for module in submodules:
+    last_module = getattr(last_module, module)
+send_mail = getattr(last_module, send_func)
 
 class FlowModel(CommonModel):
     NEXT_MODEL = None
