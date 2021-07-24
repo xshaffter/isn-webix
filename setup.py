@@ -6,8 +6,8 @@ README = open(os.path.join(here, 'README.rst')).read()
 
 setup(
     name='isn-webix',
-    version='0.2.3.1',
-    packages=['isn_webix', 'isn_webix.models', 'isn_webix.serializers'],
+    version='0.2.4',
+    packages=['isn', 'isn.models', 'isn.serializers', 'isn.serializers.fields'],
     description='Work with prepared Webix-django classes',
     long_description=README,
     author='Alfredo Martinez',

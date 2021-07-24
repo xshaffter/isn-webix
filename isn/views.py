@@ -7,8 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from isn_webix.mixins import WebixListModelMixin
-from isn_webix.serializers import SelectListSerializer, RejectionSerializer, ApproveSerializer, RequestApprovalSerializer
+from isn.mixins import WebixListModelMixin
+from isn.serializers import SelectListSerializer, RejectionSerializer, ApproveSerializer, RequestApprovalSerializer
 
 
 # noinspection PyProtectedMember,PyBroadException,PyAttributeOutsideInit,PyUnresolvedReferences

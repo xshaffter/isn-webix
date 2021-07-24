@@ -1,7 +1,7 @@
 from api_auto_doc.views import LIST_SERIALIZER
 from rest_framework.decorators import action
 
-from isn_webix.utils import WebixPagination
+from isn.utils import WebixPagination
 
 
 # noinspection PyUnresolvedReferences

@@ -5,4 +5,4 @@ from django.apps import AppConfig
 
 
 class IsnUtilsConfig(AppConfig):
-    name = 'isn_webix'
+    name = 'isn'

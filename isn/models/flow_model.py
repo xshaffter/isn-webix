@@ -2,7 +2,7 @@ from django.apps import apps
 from django.conf import settings
 from django.db import models, transaction
 
-from isn_webix.models import CommonModel
+from isn.models import CommonModel
 SEND_MAIL_APPLICATION = getattr(settings, 'SEND_MAIL_APPLICATION', 'post_office.mail.send').split('.')
 
 MAIL_APPLICATION = SEND_MAIL_APPLICATION[0]

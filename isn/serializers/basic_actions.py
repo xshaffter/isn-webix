@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from isn_webix.models import FlowModel
+from isn.models import FlowModel
 
 
 # noinspection PyAbstractClass
