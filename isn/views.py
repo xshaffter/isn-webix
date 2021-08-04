@@ -14,6 +14,37 @@ from isn.serializers import SelectListSerializer, RejectionSerializer, ApproveSe
 # noinspection PyProtectedMember,PyBroadException,PyAttributeOutsideInit,PyUnresolvedReferences
 class WebixBaseModelViewSet(BaseViewSet):
     choice_fields = list()
+    EXTRA_FILTER_DATA = None
+    FILTER_PARAMS = []
+
+    def get_filter_data(self):
+        data = dict()
+        for param in self.FILTER_PARAMS:
+            obj = getattr(self.model, param)
+            if obj:
+                obj_info = {
+                    'type': type(obj)
+                }
+            else:
+                obj_info = 'No info can be substracted'
+            data[obj] = obj_info
+
+        if self.EXTRA_FILTER_DATA:
+            data.update(**self.EXTRA_FILTER_DATA)
+        return data
+
+    def get_queryset(self):
+        queryset = self.queryset.all()
+        for param in self.FILTER_PARAMS:
+            value = self.get_filter_param(param)
+            if value:
+                filter = {param: value}
+                queryset = queryset.filter(filter)
+
+        return queryset
+
+    def get_filter_param(self, param, default=False):
+        return self.request.data.get(para, self.GET.get(param, default))
 
     @action(detail=False, methods=['get'], serializer_class=SelectListSerializer)
     def select_list(self, __):
